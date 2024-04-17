@@ -4,7 +4,7 @@
   "description": "一个简单方便使用less的vscode插件",
   "version": "0.0.1",
   "publisher": "jehangao",
-  "repository": "",
+  "repository": "https://github.com/Jehan-Gao/less-easy-helper",
   "icon": "images/less.png",
   "engines": {
     "vscode": "^1.46.0"
@@ -20,14 +20,14 @@
     "commands": [],
     "configuration": {
       "type": "object",
-      "title": "less-helper插件配置",
+      "title": "less-easy-helper插件配置",
       "properties": {
-        "less-helper.paths": {
+        "less-easy-helper.paths": {
           "type": "array",
           "scope": "window",
           "description": "less文件读取路径"
         },
-        "less.notice": {
+        "less-easy-helper.notice": {
           "type": "boolean",
           "scope": "window",
           "default": true,

@@ -1,5 +1,8 @@
 import fs from 'fs';
 import { promisify } from 'util';
+import { lessOption } from './constants'
+
+const { replaceLessVariable, replaceLessVariableValue,} = lessOption
 
 const read = promisify(fs.readFile);
 
@@ -51,13 +54,14 @@ export async function getStore(mixinsPaths: string[]) {
         {}
       );
 
-      console.log('variablesMap', variablesMap)
+      // console.log('variablesMap', variablesMap)
       
       // 匹配 less 类名
       methodsMap = (data.match(/\.(.+?)\s+{([^]*?)}/g) || []).reduce(
         (pre: Store, cur: string) => {
           // @TODO:
           cur = cur.replace(/@{prefix}/g, 'k');
+          cur = cur.replace(new RegExp(`@{${replaceLessVariable}}`, 'g'), replaceLessVariableValue);
           const nameMatch = cur.match(/^.+(?=\s+{)/g)
           const name = nameMatch ? (nameMatch[0]).trim() : ''
           const value = cur.replace(new RegExp(`${name}\\s+`), '')

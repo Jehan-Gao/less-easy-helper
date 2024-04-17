@@ -5,48 +5,42 @@ import fs from 'fs';
 export function getMixinsPaths() {
   // 读取配置
   const configPaths =
-    vscode.workspace.getConfiguration().get<Array<string>>('less-helper.paths') || [];
+    vscode.workspace.getConfiguration().get<Array<string>>('less-easy-helper.paths') || [];
 
   const mixinsPaths: string[] = []
-  console.log('configPaths', configPaths)
+  
+  // console.log('configPaths', configPaths)
 
   if (configPaths.length) {
     configPaths.forEach((path) => {
-      const targetLessFiles = fs.readdirSync(path);  
-      getFilePath(targetLessFiles, path);
+      mixinsPaths.push(...new Set(getFilePath(path)));
     })
-
-    console.log('fafafafa', mixinsPaths)
+    // console.log('mixinsPaths---->', mixinsPaths)
+    return mixinsPaths
   } else {
-    const workspaceFolders = vscode.workspace.workspaceFolders
-    if (!workspaceFolders) return []
-    const curWorkspacePath = workspaceFolders[0].uri.fsPath;
-    const lessPath = `${curWorkspacePath}/node_modules/kfz-base-style/lib`;
-    // 同步配置文件
-    vscode.workspace
-    .getConfiguration()
-    .update('less-helper.paths', [lessPath], true);
-
-    const targetLessFiles = fs.readdirSync(lessPath);
-    getFilePath(targetLessFiles, lessPath);
+    return []
   } 
 
-  function getFilePath (fileArr: string[], filePath: string) {
-    fileArr.forEach((file) => {
-      if (/\.less/.test(file)) {
-        const curPath = path.resolve(filePath, file);
-        if (fs.existsSync(curPath)) {
-          mixinsPaths.push(curPath);
+  function getFilePath (filePath: string) {
+    const paths: string[] = []
+    function getPaths(filePath: string) {
+      try {
+        const stats = fs.statSync(filePath);
+        if (stats.isDirectory()) {
+          const dirPath = fs.readdirSync(filePath);
+          dirPath.forEach((file) => {
+            paths.push(...new Set(getPaths(path.resolve(filePath, file)))) 
+          })
+        } else if (stats.isFile() && /\.less/.test(filePath)) {
+          if (fs.existsSync(filePath)) {
+            paths.push(filePath)
+          }
         }
-      } else {
-        const curPath = path.resolve(filePath, file);
-        const fileArr = fs.readdirSync(curPath)
-        if (fileArr) {
-          getFilePath(fileArr, curPath);
-        }
+      } catch (error) {
+         console.log('getFilePath error ->', error)
       }
-    })
+      return paths
+    }
+    return getPaths(filePath);
   }
-
-  return mixinsPaths
 }

@@ -3,6 +3,7 @@
 import * as vscode from 'vscode';
 import registerHover from './registerHover';
 import registerDefinition from './registerDefinition';
+import { welcome } from './welcome';
 import { getMixinsPaths } from './getMixins';
 import { getStore, originalData } from './getStore';
 import registerAutoComplete from './registerAutoComplete';
@@ -11,9 +12,9 @@ import { watchMixins, watchConfig, watchers } from './watcher';
 export const unRegisters: vscode.Disposable[] = [];
 
 export async function activate(context: vscode.ExtensionContext) {
-  console.log('-----less-helper 插件已激活-----');
+  console.log('-----less-easy-helper 插件已激活-----');
 
-  // welcome();
+  welcome();
   init();
   watchConfig(init);
 

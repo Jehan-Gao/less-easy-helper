@@ -1,7 +1,8 @@
 import * as vscode from 'vscode';
-import fs from 'fs';
 import { unRegisters } from './extension';
 import { originalData } from './getStore';
+import { lessOption } from './constants';
+const { replaceLessVariable, replaceLessVariableValue } = lessOption;
 
 export default function (
   context: vscode.ExtensionContext,
@@ -18,19 +19,24 @@ export default function (
     const word = document.getText(document.getWordRangeAtPosition(position));
     // 和 hover 中的判断有所区分
     const isMethod = /\.(.*)/i.test(word);
-    console.log('isMethod', isMethod)
     const isVariable = /^@(?!import)\w+/i.test(word);
+
+    // @NOTE: 这里需要使用 restorePrefix 将 k 前缀 再还原成 @{prefix},才能准确定位
+    // @TODO: 是否要做成可配置的？不确定因素太多，会导致逻辑复杂
+    function restorePrefix(str: string) {
+      if (!isMethod) return str
+      return str.replace(replaceLessVariableValue, `@{${replaceLessVariable}}`)
+    }
 
     originalData.forEach((item) => {
       const [path, content] = item;
-      console.log(111, content.indexOf(word), mixinsPaths);
       if (
         !mixinsPaths.includes(fileName) &&
-        content.indexOf(word) !== -1 &&
+        content.indexOf(restorePrefix(word)) !== -1 &&
         (isMethod || isVariable)
       ) {
         const lines = content
-          .slice(0, content.indexOf(word))
+          .slice(0, content.indexOf(restorePrefix(word)))
           ?.match(/\n/g)?.length;
         uris.push(
           new vscode.Location(
